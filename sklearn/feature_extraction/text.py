@@ -48,7 +48,7 @@ __all__ = [
 ]
 
 
-def _preprocess(doc, accent_function=None, lower=False):
+def _preprocess(doc, accent_function=None, lower=False, lower_after_strip_accents=False):
     """Chain together an optional series of text preprocessing steps to
     apply to a document.
 
@@ -71,6 +71,8 @@ def _preprocess(doc, accent_function=None, lower=False):
         doc = doc.lower()
     if accent_function is not None:
         doc = accent_function(doc)
+    if lower_after_strip_accents:
+        doc = doc.lower()
     return doc
 
 
@@ -335,7 +337,7 @@ class _VectorizerMixin:
                 'Invalid value for "strip_accents": %s' % self.strip_accents
             )
 
-        return partial(_preprocess, accent_function=strip_accents, lower=self.lowercase)
+        return partial(_preprocess, accent_function=strip_accents, lower=self.lowercase, lower_after_strip_accents=self.lower_after_strip_accents)
 
     def build_tokenizer(self):
         """Return a function that splits a string into a sequence of tokens.
@@ -1098,6 +1100,7 @@ class CountVectorizer(_VectorizerMixin, BaseEstimator):
         preprocessor=None,
         tokenizer=None,
         stop_words=None,
+        lower_after_strip_accents=False,
         token_pattern=r"(?u)\b\w\w+\b",
         ngram_range=(1, 1),
         analyzer="word",
@@ -1112,6 +1115,7 @@ class CountVectorizer(_VectorizerMixin, BaseEstimator):
         self.encoding = encoding
         self.decode_error = decode_error
         self.strip_accents = strip_accents
+        self.lower_after_strip_accents = lower_after_strip_accents
         self.preprocessor = preprocessor
         self.tokenizer = tokenizer
         self.analyzer = analyzer
